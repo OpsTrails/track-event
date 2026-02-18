@@ -1,0 +1,47 @@
+name: 'OpsTrails Track Event'
+description: 'Track an infrastructure event (deployment, rollback, release, etc.) in OpsTrails'
+author: 'OpsTrails'
+
+branding:
+  icon: 'activity'
+  color: 'blue'
+
+inputs:
+  api-key:
+    description: 'OpsTrails API key (starts with ot_)'
+    required: true
+  type:
+    description: 'Event type (e.g., deployment, rollback, release, data-load)'
+    required: true
+  subject:
+    description: 'Environment or target (e.g., production, staging)'
+    required: false
+  version:
+    description: 'Version identifier or commit SHA'
+    required: false
+  description:
+    description: 'Human-readable description of the event'
+    required: false
+  source:
+    description: 'Event source URI. Defaults to //github.com/{owner}/{repo}'
+    required: false
+  severity:
+    description: 'Event severity: LOW, MINOR, MAJOR, or CRITICAL'
+    required: false
+  data:
+    description: 'Additional event data as JSON string'
+    required: false
+  api-url:
+    description: 'OpsTrails API base URL (override for self-hosted or staging)'
+    required: false
+    default: 'https://api.opstrails.dev'
+
+outputs:
+  event-id:
+    description: 'The ID of the created event'
+  event-time:
+    description: 'The server-assigned event time (ISO 8601)'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
