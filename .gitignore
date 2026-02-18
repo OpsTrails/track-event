@@ -1,2 +1,19 @@
 node_modules/
 src/**/*.js
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.*
+
+# Coverage
+coverage/

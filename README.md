@@ -11,29 +11,29 @@ GitHub Action to track infrastructure events (deployments, rollbacks, releases, 
     type: deployment
     subject: production
     version: ${{ github.sha }}
-    description: "Deployed to production"
+    description: 'Deployed to production'
 ```
 
 ## Inputs
 
-| Input         | Required | Description                                                       |
-| ------------- | -------- | ----------------------------------------------------------------- |
-| `api-key`     | Yes      | OpsTrails API key (starts with `ot_`)                             |
-| `type`        | Yes      | Event type (e.g., `deployment`, `rollback`, `release`)            |
-| `subject`     | No       | Environment or target (e.g., `production`, `staging`)             |
-| `version`     | No       | Version identifier or commit SHA                                  |
-| `description` | No       | Human-readable description of the event                           |
-| `source`      | No       | Event source URI. Defaults to `//github.com/{owner}/{repo}`       |
-| `severity`    | No       | Event severity: `LOW`, `MINOR`, `MAJOR`, or `CRITICAL`            |
-| `data`        | No       | Additional event data as a JSON string                            |
-| `api-url`     | No       | API base URL (default: `https://api.opstrails.dev`)               |
+| Input         | Required | Description                                                 |
+| ------------- | -------- | ----------------------------------------------------------- |
+| `api-key`     | Yes      | OpsTrails API key (starts with `ot_`)                       |
+| `type`        | Yes      | Event type (e.g., `deployment`, `rollback`, `release`)      |
+| `subject`     | No       | Environment or target (e.g., `production`, `staging`)       |
+| `version`     | No       | Version identifier or commit SHA                            |
+| `description` | No       | Human-readable description of the event                     |
+| `source`      | No       | Event source URI. Defaults to `//github.com/{owner}/{repo}` |
+| `severity`    | No       | Event severity: `LOW`, `MINOR`, `MAJOR`, or `CRITICAL`      |
+| `data`        | No       | Additional event data as a JSON string                      |
+| `api-url`     | No       | API base URL (default: `https://api.opstrails.dev`)         |
 
 ## Outputs
 
-| Output       | Description                              |
-| ------------ | ---------------------------------------- |
-| `event-id`   | The ID of the created event              |
-| `event-time` | The server-assigned event time (ISO 8601)|
+| Output       | Description                               |
+| ------------ | ----------------------------------------- |
+| `event-id`   | The ID of the created event               |
+| `event-time` | The server-assigned event time (ISO 8601) |
 
 ## Examples
 
@@ -71,7 +71,7 @@ jobs:
     subject: production
     version: v1.2.3
     severity: MAJOR
-    description: "Rolling back due to elevated error rate"
+    description: 'Rolling back due to elevated error rate'
     data: '{"reason": "error_rate_spike", "rolled_back_from": "v1.3.0"}'
 ```
 

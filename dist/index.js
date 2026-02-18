@@ -25643,7 +25643,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 9407:
+/***/ 1730:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -25682,7 +25682,10 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
+const VALID_SEVERITIES = ['LOW', 'MINOR', 'MAJOR', 'CRITICAL'];
+const REQUEST_TIMEOUT_MS = 30_000;
 async function run() {
     try {
         const apiKey = core.getInput('api-key', { required: true });
@@ -25694,6 +25697,11 @@ async function run() {
         const severity = core.getInput('severity');
         const dataInput = core.getInput('data');
         const apiUrl = core.getInput('api-url') || 'https://api.opstrails.dev';
+        // Validate severity if provided
+        if (severity && !VALID_SEVERITIES.includes(severity)) {
+            core.setFailed(`Invalid severity "${severity}". Must be one of: ${VALID_SEVERITIES.join(', ')}`);
+            return;
+        }
         // Default source to //github.com/{owner}/{repo}
         const githubRepository = process.env.GITHUB_REPOSITORY ?? '';
         const source = sourceInput || `//github.com/${githubRepository}`;
@@ -25735,15 +25743,31 @@ async function run() {
         core.setSecret(apiKey);
         core.info(`Tracking "${type}" event for source "${source}"`);
         const url = `${apiUrl.replace(/\/+$/, '')}/api/v1/events`;
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify(event),
-        });
-        const body = (await response.json());
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+        let response;
+        try {
+            response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${apiKey}`,
+                },
+                body: JSON.stringify(event),
+                signal: controller.signal,
+            });
+        }
+        finally {
+            clearTimeout(timeout);
+        }
+        let body;
+        try {
+            body = (await response.json());
+        }
+        catch {
+            core.setFailed(`OpsTrails API returned non-JSON response (${response.status}): ${response.statusText}`);
+            return;
+        }
         if (!response.ok || !body.success) {
             const errorBody = body;
             core.setFailed(`OpsTrails API error (${response.status}): ${errorBody.error} [${errorBody.code}]`);
@@ -25756,14 +25780,18 @@ async function run() {
     }
     catch (error) {
         if (error instanceof Error) {
-            core.setFailed(error.message);
+            if (error.name === 'AbortError') {
+                core.setFailed(`Request to OpsTrails API timed out after ${REQUEST_TIMEOUT_MS / 1000}s`);
+            }
+            else {
+                core.setFailed(error.message);
+            }
         }
         else {
             core.setFailed('An unexpected error occurred');
         }
     }
 }
-run();
 
 
 /***/ }),
@@ -27679,13 +27707,19 @@ module.exports = parseParams
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(9407);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+var exports = __webpack_exports__;
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const main_js_1 = __nccwpck_require__(1730);
+(0, main_js_1.run)();
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
